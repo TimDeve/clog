@@ -1,0 +1,57 @@
+(def clog-checked-env false)
+(def clog-min-level 2)
+
+(defmodule Clog
+  (defn str-to-int [str]
+    (case str
+      "ALL"   0
+      "TRACE" 0
+      "DEBUG" 1
+      "INFO"  2
+      "WARN"  3
+      "ERROR" 4
+      "FATAL" 5
+      2))
+
+  (defn check-and-set-min-level []
+    (unless clog-checked-env
+      (do
+        (match (IO.getenv @"CLOG_MIN_LEVEL")
+          (Maybe.Just level) (set! clog-min-level (str-to-int &level))
+          Maybe.Nothing (set! clog-min-level 2))
+        (set! clog-checked-env true))))
+
+ (defmacro trace [log]
+  (list 'do
+    (list 'Clog.check-and-set-min-level)
+    (list 'when (list '<= 'clog-min-level '0)
+      (list 'println* log))))
+
+ (defmacro debug [log]
+  (list 'do
+    (list 'Clog.check-and-set-min-level)
+    (list 'when (list '<= 'clog-min-level '1)
+      (list 'println* log))))
+
+ (defmacro info [log]
+  (list 'do
+    (list 'Clog.check-and-set-min-level)
+    (list 'when (list '<= 'clog-min-level '2)
+      (list 'println* log))))
+
+ (defmacro warn [log]
+  (list 'do
+    (list 'Clog.check-and-set-min-level)
+    (list 'when (list '<= 'clog-min-level '3)
+      (list 'println* log))))
+
+ (defmacro error [log]
+  (list 'do
+    (list 'Clog.check-and-set-min-level)
+    (list 'when (list '<= 'clog-min-level '4)
+      (list 'IO.errorln log))))
+
+ (defmacro fatal [log]
+  (list 'do
+    (list 'IO.errorln log)
+    (list 'System.exit '1))))
