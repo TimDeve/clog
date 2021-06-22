@@ -16,7 +16,7 @@
   (defn check-and-set-min-level []
     (unless clog-checked-env
       (do
-        (match (IO.getenv @"CLOG_MIN_LEVEL")
+        (match (IO.getenv "CLOG_MIN_LEVEL")
           (Maybe.Just level) (set! clog-min-level (str-to-int &level))
           Maybe.Nothing (set! clog-min-level 2))
         (set! clog-checked-env true))))
